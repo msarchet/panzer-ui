@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>  
+	<head>    
+		<title>Socket.IO chat</title>    
+		<style>      
+			body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+			#form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }      
+			#input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }      
+			#input:focus { outline: none; }      
+			#form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+			#messages { list-style-type: none; margin: 0; padding: 0; }      
+			#messages > li { padding: 0.5rem 1rem; }      
+			#messages > li:nth-child(odd) { background: #efefef; }    
+			</style>  
+		</head>  
+		<link rel="stylesheet" href="css/chessboard-1.0.0.css" />
+	<body>    
+		<div id="board1" style="width: 400px"></div>
+		<input type="text" id="fen"></input>
+		<div id="currentFen"></div>
+		<div id="state"></div>
+		<div>W:<div id="whiteEngine"></div></div>
+		<div>B:<div id="blackEngine"></div></div>
+		<div id="scores"></div>
+		<div id="moves"></div>
+		<button id="startgame">Start</button>
+		<div id="board2" style="width: 400px"></div>
+		<input id="analysis-fen"></input>
+		<button id="analyze">Analyze</>
+	</body>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/js/jquery-3.6.0.min.js"></script>
+	<script src="/js/chessboard-1.0.0.js"></script>
+	<script>
+		let currentFen = ""
+		const fenoutput = document.getElementById('currentFen');
+
+		function onChange(oldPos, newPos)
+		{
+			currentFen = Chessboard.objToFen(newPos);	
+			$('#currentFen').html(currentFen);
+		}
+
+		var board1 = Chessboard('board1',  { 
+		    position : 'start',
+			onChange: onChange
+		})
+
+		var board2 = Chessboard('board2',  { 
+		    position : 'start',
+			onChange: onChange
+		})
+
+
+		var socket = io();
+
+		let moveContainer = $("#moves");
+		socket.on('update_board', d => {
+			board1.position(d.fen)
+			moveContainer.append(d.move + ' ')
+		});
+
+		socket.on('names', d => {
+			$("#whiteEngine").html(d.white);
+			$("#blackEngine").html(d.black);
+		})
+
+		socket.on('state', d => {
+			let state = d.state;
+			$("#state").html(state);
+		})
+
+		socket.on('scores', d => {
+			$("#state").html('new game');
+			$("#scores").html(`latest ${d.latestWins}, other ${d.otherWins}, draws ${d.draws}`)
+			moveContainer.html('');
+		})
+		$('#startgame').click(_ =>  {
+			$('#state').html("new game");
+			socket.emit('startgame') 
+			moveContainer.html("")
+		})
+
+		$("#anaylze").click(() => board2.position($("#analysis-fen").html()))
+
+	</script>
+</html>

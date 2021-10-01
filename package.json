@@ -1,0 +1,23 @@
+{
+  "name": "panzer-ui",
+  "version": "0.1.0",
+  "description": "Chess Engine testing app",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/msarchet/panzer-ui.git"
+  },
+  "author": "Michael Sarchet",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/msarchet/panzer-ui/issues"
+  },
+  "homepage": "https://github.com/msarchet/panzer-ui#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.2.0"
+  }
+}
